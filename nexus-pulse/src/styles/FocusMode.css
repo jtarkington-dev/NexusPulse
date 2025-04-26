@@ -1,0 +1,196 @@
+.focus-mode {
+    padding: 20px;
+}
+
+.task-input {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.task-input input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px 0 0 8px;
+    border: none;
+    outline: none;
+}
+
+.task-input button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #00ffe7;
+    color: #1a1a1a;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0 8px 8px 0;
+}
+
+.task-input button:hover {
+    background-color: #00ccbb;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+}
+
+.task-list li {
+    background-color: #1a1a1a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.task-list li:hover {
+    background-color: #333;
+}
+
+.task-list li.completed {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.streak-counter {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #00ffe7;
+    font-weight: bold;
+}
+
+.pomodoro-timer {
+    background-color: #1a1a1a;
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px auto;
+    width: 300px;
+    /* Narrower */
+    box-shadow: 0 0 10px #00ffe7;
+}
+
+.pomodoro-timer h2 {
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.timer-display {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.timer-controls button {
+    padding: 8px 16px;
+    background-color: #00ffe7;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.timer-controls button:hover {
+    background-color: #00ccbb;
+}
+
+/* Theme-specific timer styles */
+.cyberpunk-theme {
+    background: linear-gradient(135deg, #00ffe7, #0e0e0e);
+    box-shadow: 0 0 20px #00ffe7;
+    border: 2px solid #00ffe7;
+}
+
+.fallout-theme {
+    background-color: #2e2e2e;
+    border: 2px dashed #f1f100;
+    color: #f1f100;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.mario-theme {
+    background: url('/assets/mario-block-bg.png') no-repeat center/cover;
+    color: #ff4500;
+    text-shadow: 2px 2px #000;
+}
+
+.zelda-theme {
+    background: url('/assets/zelda-rune-bg.png') no-repeat center/cover;
+    color: #99ff99;
+    font-family: 'Georgia', serif;
+    text-shadow: 1px 1px #000;
+}
+
+/* Base Timer Button Style */
+.timer-btn {
+    padding: 10px 18px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.cyberpunk-btn {
+    background-color: #00ffe7;
+    color: #0e0e0e;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #00ffe7;
+    border: none;
+}
+
+.cyberpunk-btn:hover {
+    background-color: #00ccbb;
+    box-shadow: 0 0 15px #00ccbb;
+}
+
+.fallout-btn {
+    background-color: #f1f100;
+    color: #2e2e2e;
+    border: 2px dashed #f1f100;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    border-radius: 0px;
+}
+
+.fallout-btn:hover {
+    background-color: #c7c700;
+}
+
+.mario-btn {
+    background-color: #ff4500;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    text-transform: uppercase;
+    border: 3px solid #000;
+    border-radius: 6px;
+    padding: 8px 14px;
+}
+
+.mario-btn:hover {
+    background-color: #e03d00;
+    border-color: #222;
+}
+
+.zelda-btn {
+    background-color: #99ff99;
+    color: #003300;
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    border: 2px solid #99ff99;
+    border-radius: 50px;
+    box-shadow: 0 0 5px #99ff99;
+}
+
+.zelda-btn:hover {
+    background-color: #88e688;
+    box-shadow: 0 0 10px #88e688;
+}
