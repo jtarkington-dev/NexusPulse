@@ -54,14 +54,36 @@ const getPriorityColor = (priority) => {
     }
 };
 
-function TaskCard({ task, theme, onToggleComplete, onDelete, onToggleSubtask, onAddSubtask, onStartFocus, focusedTaskId, isFocusPaused, onPauseFocus, onResumeFocus, onStopFocus }) {
+function TaskCard({
+    task,
+    theme,
+    onToggleComplete,
+    onDelete,
+    onToggleSubtask,
+    onAddSubtask,
+    onStartFocus,
+    focusedTaskId,
+    isFocusPaused,
+    onPauseFocus,
+    onResumeFocus,
+    onStopFocus,
+    onUpdateTask
+}) {
+
     const [expanded, setExpanded] = useState(false);
     const [newSubtask, setNewSubtask] = useState('');
+    const [editingDetails, setEditingDetails] = useState(false);
+    const [editedDetails, setEditedDetails] = useState(task.details || '');
 
     const isOverdue = () => {
         if (!task.dueDate || task.completed) return false;
         const today = new Date().toISOString().split('T')[0];
         return today > task.dueDate;
+    };
+
+    const handleSaveDetails = () => {
+        onUpdateTask(task.id, { details: editedDetails });
+        setEditingDetails(false);
     };
 
     return (
@@ -80,30 +102,54 @@ function TaskCard({ task, theme, onToggleComplete, onDelete, onToggleSubtask, on
                 cursor: 'default'
             }}
         >
+            {/* Top Bar */}
             <div
-                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                 onClick={() => setExpanded(prev => !prev)}
             >
-                <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => onToggleComplete(task.id)}
-                    style={{ marginRight: '10px' }}
-                />
-                <span style={{
-                    fontWeight: 'bold',
-                    fontSize: '16px',
-                    textDecoration: task.completed ? 'line-through' : 'none',
-                    color: task.completed ? '#888' : '#000',
-                    transition: 'all 0.2s ease'
-                }}>
-                    {task.text}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => onToggleComplete(task.id)}
+                        style={{ marginRight: '10px' }}
+                    />
+                    <span style={{
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        textDecoration: task.completed ? 'line-through' : 'none',
+                        color: task.completed ? '#888' : '#000',
+                        transition: 'all 0.2s ease'
+                    }}>
+                        {task.text}
+                    </span>
+                    {task.tag && (
+                        <span
+                            style={{
+                                marginLeft: '10px',
+                                backgroundColor: '#eee',
+                                padding: '2px 6px',
+                                borderRadius: '5px',
+                                fontSize: '12px',
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            {task.tag}
+                        </span>
+                    )}
+                </div>
+
+                {/* Always show Time Spent */}
+                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>
+                    {Math.floor((task.timeSpent || 0) / 60).toString().padStart(2, '0')}:
+                    {((task.timeSpent || 0) % 60).toString().padStart(2, '0')}
+                </div>
             </div>
 
+            {/* Expandable Section */}
             <div
                 style={{
-                    maxHeight: expanded ? '500px' : '0px',
+                    maxHeight: expanded ? '1000px' : '0px',
                     overflow: 'hidden',
                     transition: 'max-height 0.4s ease',
                     backgroundColor: expanded ? '#f9f9f9' : 'transparent',
@@ -116,147 +162,188 @@ function TaskCard({ task, theme, onToggleComplete, onDelete, onToggleSubtask, on
             >
                 {expanded && (
                     <>
-                        {task.tag && <div><strong>Tag:</strong> {task.tag}</div>}
-                        {task.dueDate && <div><strong>Due:</strong> {task.dueDate}</div>}
-
-                        {focusedTaskId === task.id && (
-                            <div style={{ marginTop: '8px', fontWeight: 'bold' }}>
-                                Time Spent: {Math.floor((task.timeSpent || 0) / 60)
-                                    .toString()
-                                    .padStart(2, '0')}:{((task.timeSpent || 0) % 60)
-                                        .toString()
-                                        .padStart(2, '0')}
+                        {/* Due Date */}
+                        {task.dueDate && (
+                            <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                                Due: {task.dueDate}
                             </div>
                         )}
 
-                        {/* Focus Buttons */}
-                        {focusedTaskId === task.id ? (
-                            <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+                        {/* Details */}
+                        <div style={{ marginBottom: '8px' }}>
+                            <strong>Details:</strong>
+                            {editingDetails ? (
+                                <>
+                                    <textarea
+                                        value={editedDetails}
+                                        onChange={(e) => setEditedDetails(e.target.value)}
+                                        rows={3}
+                                        style={{ width: '100%', marginTop: '5px', padding: '8px' }}
+                                    />
+                                    <button
+                                        style={{
+                                            ...getButtonStyle(theme),
+                                            marginTop: '5px',
+                                            padding: '4px 8px',
+                                            fontSize: '12px',
+                                            borderRadius: '6px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={handleSaveDetails}
+                                    >
+                                        Save Details
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ marginTop: '5px', marginBottom: '5px' }}>
+                                        {task.details || 'No details yet.'}
+                                    </div>
+                                    <button
+                                        style={{
+                                            ...getButtonStyle(theme),
+                                            padding: '2px 6px',
+                                            fontSize: '12px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            marginTop: '3px'
+                                        }}
+                                        onClick={() => setEditingDetails(true)}
+                                    >
+                                        Edit Details
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Focus Button(s) */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '10px' }}>
+                            {focusedTaskId === task.id ? (
+                                <>
+                                    <button
+                                        style={{
+                                            ...getButtonStyle(theme),
+                                            padding: '4px 8px',
+                                            fontSize: '12px',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (isFocusPaused) {
+                                                onResumeFocus();
+                                            } else {
+                                                onPauseFocus();
+                                            }
+                                        }}
+                                    >
+                                        {isFocusPaused ? 'Resume Focus' : 'Pause Focus'}
+                                    </button>
+
+                                    <button
+                                        style={{
+                                            ...getButtonStyle(theme),
+                                            padding: '4px 8px',
+                                            fontSize: '12px',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            border: '2px solid #e74c3c'
+                                        }}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onStopFocus();
+                                        }}
+                                    >
+                                        Stop Focus
+                                    </button>
+                                </>
+                            ) : (
                                 <button
                                     style={{
                                         ...getButtonStyle(theme),
-                                        padding: '4px 8px',
-                                        fontSize: '14px',
+                                        padding: '6px 10px',
+                                        fontSize: '12px',
                                         borderRadius: '8px',
                                         fontWeight: 'bold',
                                         cursor: 'pointer'
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        if (isFocusPaused) {
-                                            onResumeFocus();
-                                        } else {
-                                            onPauseFocus();
-                                        }
+                                        onStartFocus(task.id);
                                     }}
                                 >
-                                    {isFocusPaused ? 'Resume Focus' : 'Pause Focus'}
+                                    Start Focus
                                 </button>
+                            )}
+                        </div>
 
+                        {/* Checklist */}
+                        <div style={{ marginBottom: '8px' }}>
+                            <strong>Checklist:</strong>
+                            <ul style={{ listStyleType: 'none', paddingLeft: '0', marginTop: '5px' }}>
+                                {task.subtasks.map((subtask, index) => (
+                                    <li
+                                        key={index}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            backgroundColor: '#fff',
+                                            margin: '5px 0',
+                                            padding: '5px 10px',
+                                            borderRadius: '6px',
+                                            textDecoration: subtask.completed ? 'line-through' : 'none',
+                                            color: subtask.completed ? '#888' : '#000'
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={subtask.completed}
+                                            onChange={(e) => {
+                                                e.stopPropagation();
+                                                onToggleSubtask(task.id, index);
+                                            }}
+                                            style={{ marginRight: '10px' }}
+                                        />
+                                        {subtask.text}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            {/* New Subtask Input */}
+                            <div style={{ display: 'flex', marginTop: '5px' }}>
+                                <input
+                                    type="text"
+                                    placeholder="New subtask..."
+                                    value={newSubtask}
+                                    onChange={(e) => setNewSubtask(e.target.value)}
+                                    style={{ padding: '5px', flex: '1' }}
+                                />
                                 <button
                                     style={{
                                         ...getButtonStyle(theme),
-                                        padding: '4px 8px',
-                                        fontSize: '14px',
-                                        borderRadius: '8px',
+                                        marginLeft: '5px',
+                                        padding: '5px 8px',
+                                        borderRadius: '5px',
                                         fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        border: '2px solid #e74c3c'
+                                        cursor: 'pointer'
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onStopFocus();
+                                        if (newSubtask.trim()) {
+                                            onAddSubtask(task.id, newSubtask);
+                                            setNewSubtask('');
+                                        }
                                     }}
                                 >
-                                    Stop Focus
+                                    Add
                                 </button>
                             </div>
-                        ) : (
-                            <button
-                                style={{
-                                    ...getButtonStyle(theme),
-                                    marginTop: '10px',
-                                    padding: '8px 12px',
-                                    borderRadius: '8px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onStartFocus(task.id);
-                                }}
-                            >
-                                Start Focus
-                            </button>
-                        )}
-
-                        {/* Subtasks */}
-                        {task.subtasks && task.subtasks.length > 0 && (
-                            <div style={{ marginTop: '8px' }}>
-                                <strong>Checklist:</strong>
-                                <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
-                                    {task.subtasks.map((subtask, index) => (
-                                        <li
-                                            key={index}
-                                            style={{
-                                                backgroundColor: '#fff',
-                                                margin: '5px 0',
-                                                padding: '5px 10px',
-                                                borderRadius: '6px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                textDecoration: subtask.completed ? 'line-through' : 'none',
-                                                color: subtask.completed ? '#888' : '#000',
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={subtask.completed}
-                                                onChange={(e) => {
-                                                    e.stopPropagation();
-                                                    onToggleSubtask(task.id, index);
-                                                }}
-                                                style={{ marginRight: '10px' }}
-                                            />
-                                            {subtask.text}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {/* New subtask input */}
-                        <div style={{ marginTop: '10px' }}>
-                            <input
-                                type="text"
-                                placeholder="New subtask..."
-                                value={newSubtask}
-                                onChange={(e) => setNewSubtask(e.target.value)}
-                                style={{ padding: '5px', width: '80%' }}
-                            />
-                            <button
-                                style={{
-                                    ...getButtonStyle(theme),
-                                    marginLeft: '5px',
-                                    padding: '5px 8px',
-                                    borderRadius: '5px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (newSubtask.trim()) {
-                                        onAddSubtask(task.id, newSubtask);
-                                        setNewSubtask('');
-                                    }
-                                }}
-                            >
-                                Add
-                            </button>
                         </div>
 
-                        {/* Delete task button */}
+                        {/* Delete Task */}
                         <button
                             style={{
                                 ...getButtonStyle(theme),
@@ -272,7 +359,7 @@ function TaskCard({ task, theme, onToggleComplete, onDelete, onToggleSubtask, on
                                 onDelete(task.id);
                             }}
                         >
-                            Delete
+                            Delete Task
                         </button>
                     </>
                 )}

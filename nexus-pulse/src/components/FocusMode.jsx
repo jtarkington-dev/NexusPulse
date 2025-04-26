@@ -56,6 +56,9 @@ function FocusMode() {
     const [isRunning, setIsRunning] = useState(false);
     const [isWorkSession, setIsWorkSession] = useState(true);
 
+    const [dailyWorkSeconds, setDailyWorkSeconds] = useState(0);
+    const [dailyTaskWork, setDailyTaskWork] = useState([]);
+
     // Handle streak tracking
     useEffect(() => {
         const today = new Date().toISOString().split('T')[0];
@@ -112,6 +115,17 @@ function FocusMode() {
                         task.id === focusedTaskId ? { ...task, timeSpent: (task.timeSpent || 0) + 1 } : task
                     )
                 );
+                setDailyWorkSeconds(prev => prev + 1);
+                setDailyTaskWork(prev => {
+                    const existing = prev.find(entry => entry.taskId === focusedTaskId);
+                    if (existing) {
+                        return prev.map(entry =>
+                            entry.taskId === focusedTaskId ? { ...entry, seconds: entry.seconds + 1 } : entry
+                        );
+                    } else {
+                        return [...prev, { taskId: focusedTaskId, seconds: 1 }];
+                    }
+                });
             }, 1000);
         }
         return () => clearInterval(interval);
@@ -129,11 +143,12 @@ function FocusMode() {
             id: Date.now(),
             text: task,
             completed: false,
-            priority,
-            tag,
-            dueDate,
+            priority: priority,
+            tag: tag,
+            dueDate: dueDate,
             subtasks: [],
             timeSpent: 0,
+            details: ''
         };
         setTasks((prev) => [...prev, newTask]);
         setTask('');
@@ -158,7 +173,11 @@ function FocusMode() {
             setFocusedTaskId(id);
             setIsFocusPaused(false);
         }
+        if (!isRunning) {
+            setIsRunning(true); // Auto-start the main Pomodoro timer if it’s not already running
+        }
     };
+
 
     const handleDeleteTask = (id) => {
         setTasks((prev) => prev.filter((task) => task.id !== id));
@@ -201,6 +220,17 @@ function FocusMode() {
         setIsRunning((prev) => !prev);
     };
 
+    const handleEndDay = () => {
+        console.log('--- End of Day Report ---');
+        console.log('Total Work Time Today:', Math.floor(dailyWorkSeconds / 60), 'minutes');
+        console.log('Per Task Breakdown:');
+        dailyTaskWork.forEach((entry) => {
+            const task = tasks.find(t => t.id === entry.taskId);
+            console.log(`- ${task ? task.text : 'Unknown Task'}: ${Math.floor(entry.seconds / 60)} minutes`);
+        });
+        console.log('--------------------------');
+    };
+
     return (
         <div className="focus-mode">
             <h1>Focus Mode</h1>
@@ -224,6 +254,21 @@ function FocusMode() {
                         Reset
                     </button>
                 </div>
+            </div>
+
+            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button
+                    style={{
+                        ...getButtonStyle(theme),
+                        padding: '10px 20px',
+                        borderRadius: '10px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                    }}
+                    onClick={handleEndDay}
+                >
+                    End Day & View Report
+                </button>
             </div>
 
             <div className="streak-counter">
@@ -291,6 +336,9 @@ function FocusMode() {
                         onStopFocus={() => {
                             setFocusedTaskId(null);
                             setIsFocusPaused(false);
+                        }}
+                        onUpdateTask={(id, updates) => {
+                            setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
                         }}
                     />
                 ))}
